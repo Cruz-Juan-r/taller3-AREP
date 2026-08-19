@@ -104,20 +104,7 @@ notebook. Summary:
 
 ## SageMaker Deployment
 
-The notebook includes TensorFlow script-mode training and real-time endpoint
-deployment. To run this section, use an AWS Academy Learner Lab or an AWS
-account with SageMaker, S3, and an execution role that can start training jobs
-and create endpoints:
 
-1. Upload `cnn_fashion_mnist.ipynb` and `train.py` to SageMaker Studio.
-2. Install the SDK if needed: `pip install sagemaker`.
-3. Run the notebook through the data preparation cell to create the `train`
-  and `test` channels and upload them to S3.
-4. Run `estimator.fit({"train": train_s3, "test": test_s3})` and wait for the
-  training job to reach `Completed`.
-5. Run the deploy cell and wait for the endpoint to reach `InService`.
-6. Run the prediction cell and record the sample predictions.
-7. Run `predictor.delete_endpoint()` immediately after testing to avoid charges.
 
 The screenshots below document the local notebook execution and setup:
 
