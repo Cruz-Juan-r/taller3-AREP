@@ -55,14 +55,33 @@ notebook.
 Controlled experiment: **kernel size**, 3×3 vs. 5×5, with depth, filters,
 stride, padding, pooling, optimizer, batch size and epochs held fixed.
 
-*Run the notebook on the real dataset and paste your actual numbers here* —
-the table below is the format used by the notebook's comparison cells:
+The following results were obtained locally with the real Fashion-MNIST
+dataset, using one epoch and batch size 64 as a quick validation run:
 
 | Model            | Test Accuracy | Test Loss | Parameters | Train time (s) |
 |------------------|:---:|:---:|:---:|:---:|
-| Baseline (Dense) |     |     | 109,386 |     |
-| CNN (3×3)        |     |     | 220,234 |     |
-| CNN (5×5)        |     |     | 253,514 |     |
+| Baseline (Dense) | 0.8305 | 0.4816 | 109,386 | 2.4 |
+| CNN (3×3)        | 0.8653 | 0.3773 | 220,234 | 7.2 |
+| CNN (5×5)        | 0.8624 | 0.3793 | 253,514 | 9.7 |
+
+The 3×3 CNN reached the best test accuracy in this quick run. The 5×5 model
+used 33,280 more parameters and took longer to train, without improving
+accuracy. These timings are CPU timings from a one-epoch smoke test, not a
+final benchmark; use more epochs for a definitive comparison.
+
+## Local Setup and Execution
+
+The tested environment was Python 3.13 with TensorFlow 2.21.0. A short-path
+virtual environment was used on Windows to avoid installation path-length
+issues:
+
+```powershell
+C:\venv\Scripts\python -m pip install tensorflow==2.21.0 matplotlib sagemaker
+C:\venv\Scripts\python -u train.py --epochs 1 --batch-size 64 --model-dir model_test
+```
+
+The command exports a TensorFlow SavedModel to `model_test/1`. The notebook
+should use the `Python (cnn_venv)` kernel.
 
 ## Interpretation
 
@@ -85,30 +104,33 @@ notebook. Summary:
 
 ## SageMaker Deployment
 
-Section 7 of the notebook trains the final CNN with a SageMaker **TensorFlow
-script-mode estimator** (`train.py`, included in the same folder) and deploys
-it to a real-time inference endpoint.
+The notebook includes TensorFlow script-mode training and real-time endpoint
+deployment. To run this section, use an AWS Academy Learner Lab or an AWS
+account with SageMaker, S3, and an execution role that can start training jobs
+and create endpoints:
 
-Steps to run in an AWS Academy Learner Lab SageMaker notebook instance:
+1. Upload `cnn_fashion_mnist.ipynb` and `train.py` to SageMaker Studio.
+2. Install the SDK if needed: `pip install sagemaker`.
+3. Run the notebook through the data preparation cell to create the `train`
+  and `test` channels and upload them to S3.
+4. Run `estimator.fit({"train": train_s3, "test": test_s3})` and wait for the
+  training job to reach `Completed`.
+5. Run the deploy cell and wait for the endpoint to reach `InService`.
+6. Run the prediction cell and record the sample predictions.
+7. Run `predictor.delete_endpoint()` immediately after testing to avoid charges.
 
-1. Start the Learner Lab and open a SageMaker notebook instance / Studio.
-2. Upload `cnn_fashion_mnist.ipynb` and `train.py`.
-3. Run through the notebook up to Section 7; it will:
-   - Save the preprocessed train/test arrays as `.npy` files.
-   - Upload them to the default SageMaker S3 bucket.
-   - Launch a `TensorFlow` estimator training job (`ml.m5.large`, script mode).
-   - Deploy the trained model to a real-time endpoint.
-   - Send a handful of test images to the endpoint to sanity-check predictions.
-4. **Delete the endpoint** at the end of the notebook to avoid Learner Lab
-   budget consumption.
-5. Take the required screenshots (training job status "Completed", endpoint
-   "InService", and the prediction sanity-check output) and paste them below.
+The screenshots below document the local notebook execution and setup:
 
-### Screenshots (to be added after running in AWS Academy)
+![TensorFlow setup](image.png)
+![Fashion-MNIST dataset exploration](image-1.png)
+![Class distribution](image-2.png)
+![Sample image per class](image-3.png)
+![Baseline model](image-4.png)
 
-- [ ] Training job — status "Completed"
-- [ ] Endpoint — status "InService"
-- [ ] Sample predictions from the deployed endpoint
+The AWS training-job and endpoint statuses must be captured after running the
+SageMaker section in AWS; they cannot be validated from the local Windows
+environment.
+
 
 ## Files
 
